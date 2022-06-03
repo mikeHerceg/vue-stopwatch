@@ -2,7 +2,13 @@
 import PrimaryButton from '@/components/Primary-Button.vue';
 import {ref, watch} from 'vue'
 
-const count = ref<string>('00:00:00')
+interface Time {
+  hr:string,
+  min:string,
+  sec:string
+}
+const initialTime:Time = {hr:'00',min:'00',sec:'00'}
+const time = ref<Time>(initialTime)
 const isCounting = ref<boolean>(false)
 const timeStamps = ref<string[]>([])
 
@@ -12,24 +18,26 @@ const toggleStart = () =>{
 
 const handleReset = () =>{
   isCounting.value = false
-  count.value = '00:00:00'
+  time.value = initialTime
 }
 
 const handleTimeStamp = () =>{
-  console.log(timeStamps.value)
- timeStamps.value.push(count.value)
+  const {hr,min, sec} = time.value
+  timeStamps.value.push(`${hr}:${min}:${sec}`)
 }
 
 const removeTimeStamp = (timeStamp:string) =>{
   timeStamps.value = timeStamps.value.filter(stamp => stamp !== timeStamp)
 }
 
-let hr = 0;
-let min = 0;
-let sec = 0;
+
 
 function timerCycle() {
   
+  let hr = +time.value.hr;
+  let min = +time.value.min;
+  let sec = +time.value.sec;
+
   if ( isCounting.value == true) {
    
     sec = sec + 1;
@@ -54,7 +62,11 @@ function timerCycle() {
       hr = 0 + hr;
     }
 
-    count.value = hr + ':' + min + ':' + sec;
+    time.value =  {
+        hr:hr.toString(),
+        min:min.toString(),
+        sec:sec.toString()
+    };
 
     setTimeout(timerCycle, 1000);
   }
@@ -66,34 +78,40 @@ watch(isCounting, timerCycle)
 
 <template>
   <main>
-    <div class="timer">
-        <h1>
-        {{count}}
-        </h1>
-        <PrimaryButton :onClick="toggleStart">
-          {{ isCounting ? 'stop' : 'start' }}
-        </PrimaryButton>
-        <PrimaryButton :onClick="handleReset">
-          reset
-        </PrimaryButton>
-    </div>
-    <div v-if="isCounting || timeStamps.length" class="time-stamps">
-        <div  v-if="timeStamps.length">
-        <h2>time stamps</h2>
-        <ul >
-          <li v-for="timeStamp in timeStamps" :key="timeStamp">
-            {{ timeStamp }} 
-            <PrimaryButton :onClick="()=>removeTimeStamp(timeStamp)">
-              remove
+    <div class="column timer">
+        <div >
+            <h1>
+            {{time.hr}}:{{time.min}}:{{time.sec}}
+            </h1>
+            <PrimaryButton :onClick="toggleStart">
+              {{ isCounting ? 'stop' : 'start' }}
             </PrimaryButton>
-          </li>
-        </ul>
+            <PrimaryButton :onClick="handleReset">
+              reset
+            </PrimaryButton>
         </div>
-       
-         <PrimaryButton :onClick="handleTimeStamp" v-if="isCounting">
-          time Stamp 
-        </PrimaryButton>
     </div>
+    
+    <div class="column">
+      <div v-if="isCounting || timeStamps.length" class="time-stamps">
+              <div  v-if="timeStamps.length">
+              <h1>Time Stamps</h1>
+              <ul >
+                <li v-for="timeStamp in timeStamps" :key="timeStamp">
+                  {{ timeStamp }} 
+                  <PrimaryButton :onClick="()=>removeTimeStamp(timeStamp)">
+                    remove
+                  </PrimaryButton>
+                </li>
+              </ul>
+              </div>
+            
+              <PrimaryButton :onClick="handleTimeStamp" v-if="isCounting">
+                Create Time Stamp 
+              </PrimaryButton>
+        </div>
+    </div>
+    
     
     
   </main>
@@ -101,16 +119,25 @@ watch(isCounting, timerCycle)
 
 <style lang="scss">
   @import './assets/base.scss';
-  body{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    ul{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
     main {
       display: flex;
-      align-items: center;
+      align-items: stretch;
+      height: 100vh;
+      width:100vw;
       *{
-        margin: 10px
+        margin: 8px
       }
-    }
+      .column {
+          flex-grow: 1;
+          width:50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
   }
 </style>
