@@ -138,6 +138,11 @@ watch(isCounting, timerCycle)
       width:100vw;
 
       .timer{
+        background: var( --color-background-soft);
+        z-index: 10;
+        position: sticky;
+        top:0;
+        left: 0;
         padding:var(--spacer);
         margin-bottom:var(--spacer);
         border-bottom:2px solid gray;
