@@ -52,20 +52,17 @@ function timerCycle() {
       sec = 0;
     }
 
-    if (sec < 10 || sec == 0) {
-      sec = 0 + sec;
-    }
-    if (min < 10 || min == 0) {
-      min = 0 + min;
-    }
-    if (hr < 10 || hr == 0) {
-      hr = 0 + hr;
+    const transform = (value:number) => {
+      if (value < 10 || value == 0) {
+        return '0' + value.toString()
+      }
+      return value.toString()     
     }
 
     time.value =  {
-        hr:hr.toString(),
-        min:min.toString(),
-        sec:sec.toString()
+        hr: transform(hr),
+        min:transform(min),
+        sec:transform(sec)
     };
 
     setTimeout(timerCycle, 1000);
@@ -78,17 +75,30 @@ watch(isCounting, timerCycle)
 
 <template>
   <main>
-    <div class="column timer">
-        <div >
+    <div class="timer">
+        <div class="timer-container">
             <h1>
             {{time.hr}}:{{time.min}}:{{time.sec}}
             </h1>
-            <PrimaryButton :onClick="toggleStart">
-              {{ isCounting ? 'stop' : 'start' }}
-            </PrimaryButton>
-            <PrimaryButton :onClick="handleReset">
-              reset
-            </PrimaryButton>
+            <div class="button-group">
+              <div class="button-group_row">
+                <PrimaryButton :onClick="toggleStart" :class="isCounting ? 'timer-button_stop' : 'timer-button_start'">
+                  {{ isCounting ? 'stop' : 'start' }}
+                </PrimaryButton>
+                <PrimaryButton :onClick="handleReset">
+                  reset
+                </PrimaryButton>
+              </div>
+              <div class="button-group_row">
+                <PrimaryButton 
+                  :onClick="handleTimeStamp" 
+                  :disabled="isCounting?false:true"
+                >
+                  Create Time Stamp 
+                </PrimaryButton>
+              </div>
+            </div>
+           
         </div>
     </div>
     
@@ -96,19 +106,17 @@ watch(isCounting, timerCycle)
       <div v-if="isCounting || timeStamps.length" class="time-stamps">
               <div  v-if="timeStamps.length">
               <h1>Time Stamps</h1>
-              <ul >
+              <ul>
                 <li v-for="timeStamp in timeStamps" :key="timeStamp">
                   {{ timeStamp }} 
                   <PrimaryButton :onClick="()=>removeTimeStamp(timeStamp)">
-                    remove
+                    x
                   </PrimaryButton>
                 </li>
               </ul>
               </div>
             
-              <PrimaryButton :onClick="handleTimeStamp" v-if="isCounting">
-                Create Time Stamp 
-              </PrimaryButton>
+             
         </div>
     </div>
     
@@ -119,25 +127,50 @@ watch(isCounting, timerCycle)
 
 <style lang="scss">
   @import './assets/base.scss';
+  @import './assets/variables.scss';
     ul{
       margin: 0;
       padding: 0;
       list-style: none;
     }
     main {
-      display: flex;
-      align-items: stretch;
       height: 100vh;
       width:100vw;
-      *{
-        margin: 8px
+
+      .timer{
+        padding:var(--spacer);
+        margin-bottom:var(--spacer);
+        border-bottom:2px solid gray;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        &-container{
+          min-width: 150px;
+          text-align: center;
+        }
+
+        &-button{
+          &_start{
+            background: lightseagreen;
+          }
+          &_stop{
+            background: lightcoral;
+          }
+        }
+        
       }
-      .column {
+    }
+    .button-group{
+      width: 100%;      
+      &_row {     
+        margin-bottom:var(--spacer); 
+        display: flex;
+        justify-content: space-around;
+        * {
           flex-grow: 1;
-          width:50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        }
       }
-  }
+    }
+  
 </style>
